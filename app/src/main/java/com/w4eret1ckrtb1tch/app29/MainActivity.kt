@@ -21,6 +21,7 @@ import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FlingAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.concurrent.Executors
 import kotlin.math.hypot
@@ -36,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var text: TextView
     lateinit var flight: ImageView
     lateinit var smile: ImageView
+    lateinit var vector: ImageView
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,8 +50,14 @@ class MainActivity : AppCompatActivity() {
         text = findViewById(R.id.text)
         flight = findViewById(R.id.flight)
         smile = findViewById(R.id.smile)
+        vector = findViewById(R.id.vector)
 
-
+        // TODO: 29.07.2021 29.5 AnimatedVectorDrawable
+        val vectorAnimation = AnimatedVectorDrawableCompat.create(this,R.drawable.animated_vector)
+        vector.setImageDrawable(vectorAnimation)
+        vector.setOnClickListener {
+            vectorAnimation?.start()
+        }
         // TODO: 29.07.2021 29.3 Spring
         var diffX = 0f
         var diffY = 0f
