@@ -1,9 +1,8 @@
 package com.w4eret1ckrtb1tch.app29
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Color
+import android.graphics.ColorFilter
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -13,12 +12,15 @@ import android.view.animation.*
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.animation.addListener
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
+import androidx.core.content.ContextCompat
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FlingAnimation
+import androidx.dynamicanimation.animation.SpringAnimation
+import androidx.dynamicanimation.animation.SpringForce
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.concurrent.Executors
 import kotlin.math.hypot
@@ -33,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var fab: FloatingActionButton
     lateinit var text: TextView
     lateinit var flight: ImageView
+    lateinit var smile: ImageView
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +47,63 @@ class MainActivity : AppCompatActivity() {
         fab = findViewById(R.id.floatingActionButton)
         text = findViewById(R.id.text)
         flight = findViewById(R.id.flight)
+        smile = findViewById(R.id.smile)
 
+
+        // TODO: 29.07.2021 29.3 Spring
+        var diffX = 0f
+        var diffY = 0f
+
+        val springForce = SpringForce(0f).apply {
+            stiffness = SpringForce.STIFFNESS_LOW
+            dampingRatio = SpringForce.DAMPING_RATIO_HIGH_BOUNCY
+        }
+
+        val springX = SpringAnimation(smile, DynamicAnimation.TRANSLATION_X).apply {
+            spring = springForce
+        }
+        val springY = SpringAnimation(smile, DynamicAnimation.TRANSLATION_Y).apply {
+            spring = springForce
+        }
+
+        springX.addUpdateListener { animation, value, velocity ->
+            println("value $value")
+            println("velocity $velocity")
+            if (value in 0f..2f) smile.setColorFilter(Color.MAGENTA)
+            if (value in 2f..4f) smile.setColorFilter(Color.GRAY)
+
+            if (value in -0f..-2f) smile.setColorFilter(Color.MAGENTA)
+            if (value in -2f..-4f) smile.setColorFilter(Color.GRAY)
+
+        }
+
+        smile.setOnTouchListener { view, motionEvent ->
+            view.performClick()
+            when (motionEvent.action) {
+                //перестал касаться экрана
+                MotionEvent.ACTION_UP -> {
+//                    springX.animateToFinalPosition(200f)
+//                    springY.animateToFinalPosition(200f)
+                    springX.start()
+                    springY.start()
+                }
+
+                //коснулся экрана
+                MotionEvent.ACTION_DOWN -> {
+                    diffX = motionEvent.rawX - view.x
+                    diffY = motionEvent.rawY - view.y
+                    springX.cancel()
+                    springY.cancel()
+                }
+
+                //выполняю движение по экрану
+                MotionEvent.ACTION_MOVE -> {
+                    smile.x = motionEvent.rawX - diffX
+                    smile.y = motionEvent.rawY - diffY
+                }
+            }
+            return@setOnTouchListener true
+        }
 
         // TODO: 28.07.2021 29.2 29.2. Fling
 
@@ -72,7 +131,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val gestureDetector = GestureDetector(this,gestureListener)
+        val gestureDetector = GestureDetector(this, gestureListener)
 
         flight.setOnTouchListener { view, motionEvent ->
             view.performClick()
